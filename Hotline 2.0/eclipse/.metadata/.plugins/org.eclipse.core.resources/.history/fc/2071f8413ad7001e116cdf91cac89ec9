@@ -1,0 +1,10 @@
+package vestige.module.impl.exploit;
+
+import vestige.module.Category;
+
+public class Disabler extends Module{
+	public Disabler() {
+		super("Disabler", Category.EXPLOIT)
+	}
+
+}

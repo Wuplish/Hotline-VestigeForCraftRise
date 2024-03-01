@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+    <fullyQualifiedTypeName name="vestige.setting.impl.ModeSetting"/>
+    <fullyQualifiedTypeName name="vestige.setting.impl.NumberSetting"/>
+    <fullyQualifiedTypeName name="vestige.module.Category"/>
+    <fullyQualifiedTypeName name="cr.launcher.BlockPos"/>
+    <fullyQualifiedTypeName name="vestige.mapper.ThePlayer"/>
+    <fullyQualifiedTypeName name="vestige.event.impl.EventSendPacket"/>
+    <fullyQualifiedTypeName name="vestige.event.impl.EventRender"/>
+    <fullyQualifiedTypeName name="vestige.event.Event"/>
+    <fullyQualifiedTypeName name="vestige.event.impl.MovementEvent"/>
+    <fullyQualifiedTypeName name="cr.launcher.Config"/>
+    <fullyQualifiedTypeName name="vestige.event.impl.EventReceivePacket"/>
+    <fullyQualifiedTypeName name="vestige.event.impl.EventMotionUpdate"/>
+    <fullyQualifiedTypeName name="net.minecraft.util.MathHelper"/>
+    <fullyQualifiedTypeName name="vestige.util.misc.MathUtils"/>
+    <fullyQualifiedTypeName name="vestige.event.impl.EventUpdate"/>
+    <fullyQualifiedTypeName name="vestige.module.impl.movement.Fly"/>
+</qualifiedTypeNameHistroy>

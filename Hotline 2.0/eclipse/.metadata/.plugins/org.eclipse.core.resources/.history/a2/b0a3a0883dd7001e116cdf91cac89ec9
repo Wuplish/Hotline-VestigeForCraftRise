@@ -1,0 +1,213 @@
+package vestige.module.impl.exploit;
+
+import vestige.module.Category;
+import vestige.module.Module;
+import vestige.setting.impl.*;
+import java.util.LinkedList;
+import vestige.Vestige;
+import vestige.event.Event;
+import vestige.event.impl.EventReceivePacket;
+import vestige.event.impl.EventRender;
+import vestige.event.impl.EventSendPacket;
+import vestige.event.impl.EventUpdate;
+import vestige.mapper.ThePlayer;
+
+import com.craftrise.jS;
+import com.craftrise.jy;
+import com.craftrise.lE;
+import com.craftrise.lv; //net.minecraft.network.Packet;
+import com.craftrise.client.bO.a;
+public class Disabler extends Module{
+	public ModeSetting mode = new ModeSetting("Mode", "Verus Combat", "Verus Combat", "Verus latest", "Blocksmc", "Skywars.com", "Experimental");
+	
+	private LinkedList<com.craftrise.lv> packetsQueue = new LinkedList<>();
+	private LinkedList<com.craftrise.lv> transactionsQueue = new LinkedList<>();
+	private boolean waitingForLagback;
+	public Disabler() {
+		super("Disabler", Category.EXPLOIT);
+		this.addSettings(mode);
+	}
+	public void onEnable() {
+		transactionsQueue.clear();
+		packetsQueue.clear();
+		waitingForLagback = false;
+	}
+	public void onEvent(Event e) {
+		if(e instanceof EventRender) {
+			this.setDisplayName(this.getName() + " " + mode.getMode());
+		}
+		switch(mode.getMode()) {
+		case "Experimental":
+			Experimental(e);
+			break;
+		case "Skywars.com":
+			Skywars(e);
+		case "Verus Combat":
+			VerusCombat(e);
+			break;
+		case "Verus latest":
+			VerusLatest(e);
+			break;
+		case "Blocksmc":
+			Blocksmc(e);
+			break;
+		}
+	}
+    private void Skywars(Event event) {
+        if(event instanceof EventUpdate) {
+            Vestige.getPacketsProcessor().setMovePacketsDelay(0);
+            /*
+            if(!Vestige.getModuleManager().getModuleByName("Longjump").isEnabled() && !Vestige.getModuleManager().getModuleByName("Speed").isEnabled() && !(Vestige.getModuleManager().getModuleByName("Velocity").isEnabled() && ((Velocity) Vestige.getModuleManager().getModuleByName("Velocity")).mode.getMode().contains("AAC4") && ((Velocity) Vestige.getModuleManager().getModuleByName("Velocity")).receivedVelocity)) {
+                Vestige.getPacketsProcessor().setBlinking(mc.thePlayer.ticksExisted % 2 != 0);
+            }
+            */
+            if(Vestige.getModuleManager().getModuleByName("Longjump").isEnabled() || Vestige.getModuleManager().getModuleByName("Speed").isEnabled()) {
+                if( % 2 == 0 && mc.thePlayer.motionY > 0) {
+                    PacketUtils.sendPacketNoEvent(new C08PacketPlayerBlockPlacement(new BlockPos(-1, -1, -1), 0, mc.thePlayer.getHeldItem(), 0.5F, 0.5F, 0.5F));
+                }
+            }
+        } else if(event instanceof EventSendPacket) {
+            EventSendPacket e = (EventSendPacket) event;
+            if(e.getPacket() instanceof 	) {
+                C0BPacketEntityAction packet = (C0BPacketEntityAction) e.getPacket();
+                if(packet.getAction() == C0BPacketEntityAction.Action.START_SPRINTING || packet.getAction() == C0BPacketEntityAction.Action.STOP_SPRINTING) {
+                    e.setCancelled(true);
+                }
+            }
+        }
+    }
+	private void Experimental(Event event) {
+		if(event instanceof EventReceivePacket) {
+			EventReceivePacket e = (EventReceivePacket)event;
+			if(e.getPacket() instanceof S08PacketPlayerPosLook) {
+				e.setCancelled(true);
+				
+				S08PacketPlayerPosLook s08 = (S08PacketPlayerPosLook)e.getPacket();
+				
+				double x = s08.getX();
+				double y = s08.getY();
+				double z = s08.getZ();
+				float pitch = s08.getPitch();
+				float yaw = s08.getYaw();
+				
+				PacketUtils.sendPacketNoEvent(new C06PacketPlayerPosLook(x, y, z, pitch, yaw, false));
+			}
+			if(e.getPacket() instanceof C03PacketPlayer) {
+				if(mc.thePlayer.ticksExisted < 125 && mc.thePlayer.ticksExisted > 75) {
+					if(mc.thePlayer != null) {
+						e.setCancelled(true);
+					}
+				}
+			}
+		}
+		
+	}
+	private void VerusCombat(Event event) {
+		if(event instanceof EventUpdate) {
+			Vestige.getPacketsProcessor().setMovePacketsDelay(0);
+			Vestige.getPacketsProcessor().setPingPacketsDelay(500);
+		} else if(event instanceof EventSendPacket) {
+			EventSendPacket e = (EventSendPacket) event;
+			if(e.getPacket() instanceof C0FPacketConfirmTransaction) {
+				if(transactionsQueue.size() < 20) {
+					e.setCancelled(true);
+					transactionsQueue.add(e.getPacket());
+				}
+			}
+		}
+	}
+	private void VerusLatest(Event event) {
+		int max = 30;
+		if(ThePlayer.GetticksExisted() < 5) {
+			packetsQueue.clear();
+			transactionsQueue.clear();
+			return;
+		}
+		
+		Vestige.getPacketsProcessor().setPingPacketsDelay(100);
+		
+		if(event instanceof EventSendPacket) {
+			EventSendPacket e = (EventSendPacket) event;
+			if(e.getPacket() instanceof C0FPacketConfirmTransaction) {
+				if(mc.thePlayer.ticksExisted % 2 == 0) {
+					e.setCancelled(true);
+					transactionsQueue.add(e.getPacket());
+				}
+			} else if(e.getPacket() instanceof C03PacketPlayer) {
+				C03PacketPlayer packet = (C03PacketPlayer) e.getPacket();
+				if(mc.thePlayer.ticksExisted % 50 == 0) {
+					packet.setY(packet.getY() + 100);
+					PacketUtils.verusRightClick();
+					PacketSleepThread thread = new PacketSleepThread(new C08PacketPlayerBlockPlacement(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ), 0, HotbarUtil.getAirSlot() != -1 ? mc.thePlayer.inventory.getStackInSlot(HotbarUtil.getAirSlot()) : mc.thePlayer.getHeldItem(), 0.5F, 0.5F, 0.5F), 20);
+					thread.start();
+				} else {
+					if(mc.thePlayer.ticksExisted % 2 == 0) {
+						PacketUtils.sendPacketNoEvent(new C0BPacketEntityAction(mc.thePlayer, Action.START_SNEAKING));
+					} else {
+						PacketUtils.sendPacketNoEvent(new C0BPacketEntityAction(mc.thePlayer, Action.STOP_SNEAKING));
+					}
+				}
+			}
+		} else if(event instanceof EventUpdate) {
+			if(!transactionsQueue.isEmpty() && mc.thePlayer.ticksExisted > 100 && mc.thePlayer.ticksExisted % 20 == 0) {
+				PacketUtils.sendPacketNoEvent(transactionsQueue.get(0));
+				//Vestige.addChatMessage("ttt");
+				transactionsQueue.remove(0);
+			}
+		}
+	}
+	private void Blocksmc(Event event) {
+		if(event instanceof EventUpdate) {
+			Vestige.getPacketsProcessor().setMovePacketsDelay(0);
+			Vestige.getPacketsProcessor().setPingPacketsDelay(60);
+			
+			if(!transactionsQueue.isEmpty()) {
+				if(mc.thePlayer.ticksExisted > 100 && mc.thePlayer.ticksExisted % 8 == 0) {
+					PacketUtils.sendPacketNoEvent(transactionsQueue.poll());
+				}
+			}
+		} else if(event instanceof EventSendPacket) {
+			EventSendPacket e = (EventSendPacket) event;
+			if(e.getPacket() instanceof C0FPacketConfirmTransaction) {
+				if(transactionsQueue.size() < 400) {
+					e.setCancelled(true);
+					transactionsQueue.add(e.getPacket());
+				}
+			} else if(e.getPacket() instanceof C03PacketPlayer) {
+				C03PacketPlayer packet = (C03PacketPlayer) e.getPacket();
+				if(mc.thePlayer.ticksExisted % 60 == 0) {
+					e.setCancelled(true);
+					//packet.setMoving(false);
+					C04PacketPlayerPosition newPacket = new C04PacketPlayerPosition(packet.getX(), Math.min(packet.getY() - 11, 0), packet.getZ(), false);
+					newPacket.setMoving(false);
+					PacketUtils.verusRightClick();
+					PacketUtils.sendPacketNoEvent(newPacket);
+					//PacketUtils.verusRightClick();
+					waitingForLagback = true;
+					packetsQueue.clear();
+				}
+				
+				if(waitingForLagback) {
+					packetsQueue.add(packet);
+				}
+			}
+		} else if(event instanceof EventReceivePacket) {
+			EventReceivePacket e = (EventReceivePacket) event;
+			if(e.getPacket() instanceof S08PacketPlayerPosLook && mc.thePlayer.ticksExisted > 100) {
+				S08PacketPlayerPosLook packet = (S08PacketPlayerPosLook) e.getPacket();
+				e.setCancelled(true);
+				PacketUtils.sendPacketNoEvent(new C06PacketPlayerPosLook(packet.getX(), packet.getY(), packet.getZ(), packet.getYaw(), packet.getPitch(), false));
+				
+				if(!packetsQueue.isEmpty()) {
+					for(Packet p : packetsQueue) {
+						PacketUtils.sendPacketNoEvent(p);
+					}
+					packetsQueue.clear();
+				}
+				
+				waitingForLagback = false;
+				packetsQueue.clear();
+			}
+		}
+	}
+}

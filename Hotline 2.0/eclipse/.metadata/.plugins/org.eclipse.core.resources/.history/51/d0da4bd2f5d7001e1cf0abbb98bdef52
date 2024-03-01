@@ -1,0 +1,9 @@
+package vestige.module.impl.movement;
+
+import vestige.module.Category;
+
+public class Speed extends Module{
+	public Speed() {
+		super("Speed", Category.MOVEMENT)
+	}
+}

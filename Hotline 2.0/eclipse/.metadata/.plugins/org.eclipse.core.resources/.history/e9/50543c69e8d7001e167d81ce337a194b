@@ -1,0 +1,5 @@
+package vestige.module.impl.movement;
+
+public class Fly {
+
+}

@@ -1,0 +1,10 @@
+package vestige.mapper;
+import com.craftrise.dR;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import static java.lang.Math.*;
+public class TheWorld {
+
+}

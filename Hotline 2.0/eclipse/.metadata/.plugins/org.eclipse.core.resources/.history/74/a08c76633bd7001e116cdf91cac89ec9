@@ -1,0 +1,90 @@
+package vestige.module.impl.exploit;
+
+import vestige.module.Category;
+import vestige.module.Module;
+import vestige.setting.impl.*;
+import java.util.LinkedList;
+import vestige.Vestige;
+import vestige.event.Event;
+import vestige.event.impl.EventReceivePacket;
+import vestige.event.impl.EventRender;
+import vestige.event.impl.EventSendPacket;
+import vestige.event.impl.EventUpdate;
+
+public class Disabler extends Module{
+	public ModeSetting mode = new ModeSetting("Mode", "Verus Combat", "Verus Combat", "Verus latest", "Blocksmc", "Skywars.com", "Experimental");
+	
+	private LinkedList<Packet> packetsQueue = new LinkedList<>();
+	private LinkedList<Packet> transactionsQueue = new LinkedList<>();
+	private boolean waitingForLagback;
+	public Disabler() {
+		super("Disabler", Category.EXPLOIT);
+		this.addSettings(mode);
+	}
+	public void onEnable() {
+		transactionsQueue.clear();
+		packetsQueue.clear();
+		waitingForLagback = false;
+	}
+	public void onEvent(Event e) {
+		if(e instanceof EventRender) {
+			this.setDisplayName(this.getName() + ChatFormatting.GRAY + " " + mode.getMode());
+		}
+		switch(mode.getMode()) {
+		case "Experimental":
+			Experimental(e);
+			break;
+		case "Skywars.com":
+			Skywars(e);
+		case "Verus Combat":
+			VerusCombat(e);
+			break;
+		case "Verus latest":
+			VerusLatest(e);
+			break;
+		case "Blocksmc":
+			Blocksmc(e);
+			break;
+		}
+	}
+	private void Experimental(Event event) {
+		if(event instanceof EventReceivePacket) {
+			EventReceivePacket e = (EventReceivePacket)event;
+			if(e.getPacket() instanceof S08PacketPlayerPosLook) {
+				e.setCancelled(true);
+				
+				S08PacketPlayerPosLook s08 = (S08PacketPlayerPosLook)e.getPacket();
+				
+				double x = s08.getX();
+				double y = s08.getY();
+				double z = s08.getZ();
+				float pitch = s08.getPitch();
+				float yaw = s08.getYaw();
+				
+				PacketUtils.sendPacketNoEvent(new C06PacketPlayerPosLook(x, y, z, pitch, yaw, false));
+			}
+			if(e.getPacket() instanceof C03PacketPlayer) {
+				if(mc.thePlayer.ticksExisted < 125 && mc.thePlayer.ticksExisted > 75) {
+					if(mc.thePlayer != null) {
+						e.setCancelled(true);
+					}
+				}
+			}
+		}
+		
+	}
+	private void VerusCombat(Event event) {
+		if(event instanceof EventUpdate) {
+			Vestige.getPacketsProcessor().setMovePacketsDelay(0);
+			Vestige.getPacketsProcessor().setPingPacketsDelay(500);
+		} else if(event instanceof EventSendPacket) {
+			EventSendPacket e = (EventSendPacket) event;
+			if(e.getPacket() instanceof C0FPacketConfirmTransaction) {
+				if(transactionsQueue.size() < 20) {
+					e.setCancelled(true);
+					transactionsQueue.add(e.getPacket());
+				}
+			}
+		}
+	}
+}

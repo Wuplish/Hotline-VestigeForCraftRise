@@ -1,0 +1,8 @@
+package vestige.util.network;
+
+public class Snippet {
+	public static void main(String[] args) {
+		import vestige.util.misc.HotbarUtil;
+	}
+}
+

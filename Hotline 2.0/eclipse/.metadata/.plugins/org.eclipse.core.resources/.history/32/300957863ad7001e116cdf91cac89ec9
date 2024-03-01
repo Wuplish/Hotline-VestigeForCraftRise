@@ -1,0 +1,13 @@
+package vestige.module.impl.exploit;
+
+import vestige.module.Category;
+import vestige.module.Module;
+import vestige.setting.impl.*;
+public class Disabler extends Module{
+	public ModeSetting mode = new ModeSetting("Mode", "Verus Combat", "Verus Combat", "Verus latest", "Blocksmc", "Skywars.com", "Experimental");
+	public Disabler() {
+		super("Disabler", Category.EXPLOIT);
+	}
+	
+
+}

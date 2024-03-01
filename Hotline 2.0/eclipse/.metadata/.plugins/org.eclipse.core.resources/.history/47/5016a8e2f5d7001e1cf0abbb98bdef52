@@ -1,0 +1,11 @@
+package vestige.module.impl.movement;
+import vestige.module.Module;
+import vestige.module.Category;
+
+public class Speed extends Module{
+	private final ModeSetting mode = new ModeSetting("Mode", "Watchdog","AccYPort", "Watchdog"/*, "Matrix"*/);
+	public Speed() {
+		super("Speed", Category.MOVEMENT);
+	}
+	
+}

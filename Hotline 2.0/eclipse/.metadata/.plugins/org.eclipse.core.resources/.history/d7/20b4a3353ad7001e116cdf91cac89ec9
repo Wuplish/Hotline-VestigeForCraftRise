@@ -1,0 +1,5 @@
+package vestige.module.impl.exploit;
+
+public class Disabler {
+
+}
